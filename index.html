@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Танчики</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #1a1a1a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'Courier New', monospace;
+      color: #fff;
+    }
+    #game-container {
+      border: 3px solid #444;
+      image-rendering: pixelated;
+    }
+    #ui {
+      display: flex;
+      justify-content: space-between;
+      width: 416px;
+      padding: 8px 0;
+      font-size: 14px;
+      letter-spacing: 1px;
+    }
+    .ui-block { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .label { color: #888; font-size: 11px; }
+    .value { color: #ffd700; font-size: 16px; font-weight: bold; }
+    #controls {
+      margin-top: 8px;
+      font-size: 11px;
+      color: #555;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="ui">
+    <div class="ui-block">
+      <span class="label">ЖИЗНИ</span>
+      <span class="value" id="lives-display">❤❤❤❤❤</span>
+    </div>
+    <div class="ui-block">
+      <span class="label">БАЗА</span>
+      <span class="value" id="base-display" style="color:#ffd700">★★★★★</span>
+    </div>
+    <div class="ui-block">
+      <span class="label">УРОВЕНЬ</span>
+      <span class="value" id="level-display">1</span>
+    </div>
+    <div class="ui-block">
+      <span class="label">ВРАГИ</span>
+      <span class="value" id="enemies-display">20</span>
+    </div>
+    <div class="ui-block">
+      <span class="label">ОЧКИ</span>
+      <span class="value" id="score-display">0</span>
+    </div>
+  </div>
+  <div id="game-container"></div>
+  <div id="controls">
+    WASD / Стрелки — движение &nbsp;|&nbsp; ПРОБЕЛ / Enter — огонь &nbsp;|&nbsp; R — рестарт
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+  <script src="src/game.js"></script>
+</body>
+</html>
