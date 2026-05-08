@@ -319,11 +319,7 @@ class GameScene extends Phaser.Scene {
     for (let dr = -1; dr <= 1; dr++) {
       for (let dc = -1; dc <= 1; dc++) {
         const r = tr + dr, c = tc + dc;
-        if (r < 0 || r >= ROWS || c < 0 || c >= COLS) {
-          b.dead = true;
-          this.addExplosion(b.x, b.y, 'small');
-          return;
-        }
+        if (r < 0 || r >= ROWS || c < 0 || c >= COLS) continue;
         const tile = this.map[r][c];
         if (tile === T.EMPTY || tile === T.FOREST) continue;
 
@@ -938,6 +934,126 @@ class Bullet {
 }
 
 // =====================================================================
+// MENU SCENE
+// =====================================================================
+class MenuScene extends Phaser.Scene {
+  constructor() {
+    super('MenuScene');
+    this.blinkTimer = 0;
+    this.showPrompt = true;
+  }
+
+  create() {
+    const g = this.add.graphics();
+
+    // Background
+    g.fillStyle(0x1a1a1a);
+    g.fillRect(0, 0, W, H);
+
+    // Golden border
+    g.lineStyle(3, 0xffd700);
+    g.strokeRect(8, 8, W - 16, H - 16);
+    g.lineStyle(1, 0xc84000);
+    g.strokeRect(12, 12, W - 24, H - 24);
+
+    // Decorative tanks (left and right of title)
+    this.drawMenuTank(g, 60, H / 2 - 20, COLORS.player, DIR.RIGHT);
+    this.drawMenuTank(g, W - 60, H / 2 - 20, COLORS.enemy2, DIR.LEFT);
+
+    // Title
+    this.add.text(W / 2, H / 2 - 80, 'ТАНЧИКИ', {
+      fontFamily: 'Courier New, monospace',
+      fontSize: '52px',
+      fontStyle: 'bold',
+      color: '#ffd700',
+      stroke: '#c84000',
+      strokeThickness: 5,
+      shadow: { offsetX: 3, offsetY: 3, color: '#000000', blur: 0, fill: true },
+    }).setOrigin(0.5);
+
+    this.add.text(W / 2, H / 2 - 30, 'BATTLE CITY CLONE', {
+      fontFamily: 'Courier New, monospace',
+      fontSize: '13px',
+      color: '#666666',
+    }).setOrigin(0.5);
+
+    // Controls hint
+    this.add.text(W / 2, H / 2 + 40, 'WASD / Стрелки — движение', {
+      fontFamily: 'Courier New, monospace',
+      fontSize: '12px',
+      color: '#555555',
+    }).setOrigin(0.5);
+    this.add.text(W / 2, H / 2 + 58, 'ПРОБЕЛ / Enter — огонь  •  R — рестарт', {
+      fontFamily: 'Courier New, monospace',
+      fontSize: '12px',
+      color: '#555555',
+    }).setOrigin(0.5);
+
+    // Blinking prompt
+    this.promptText = this.add.text(W / 2, H / 2 + 100, 'НАЖМИТЕ ENTER ДЛЯ НАЧАЛА', {
+      fontFamily: 'Courier New, monospace',
+      fontSize: '15px',
+      fontStyle: 'bold',
+      color: '#ffffff',
+    }).setOrigin(0.5);
+
+    this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+    this.input.keyboard.addCapture([Phaser.Input.Keyboard.KeyCodes.ENTER]);
+  }
+
+  drawMenuTank(g, cx, cy, color, dir) {
+    const s = 2; // scale
+    const T16 = TILE * s;
+    const x = cx - T16 / 2;
+    const y = cy - T16 / 2;
+
+    g.fillStyle(color);
+    g.fillRect(x + s, y + s, T16 - s * 2, T16 - s * 2);
+
+    g.fillStyle(0x303030);
+    if (dir === DIR.RIGHT || dir === DIR.LEFT) {
+      g.fillRect(x + s, y, T16 - s * 2, s * 3);
+      g.fillRect(x + s, y + T16 - s * 3, T16 - s * 2, s * 3);
+    } else {
+      g.fillRect(x, y + s, s * 3, T16 - s * 2);
+      g.fillRect(x + T16 - s * 3, y + s, s * 3, T16 - s * 2);
+    }
+
+    const highlight = Phaser.Display.Color.IntegerToRGB(color);
+    g.fillStyle(Phaser.Display.Color.GetColor(
+      Math.min(255, highlight.r + 60),
+      Math.min(255, highlight.g + 60),
+      Math.min(255, highlight.b + 60)
+    ));
+    g.fillRect(x + s * 4, y + s * 4, T16 - s * 8, T16 - s * 8);
+
+    g.fillStyle(color);
+    g.fillRect(x + s * 5, y + s * 5, s * 6, s * 6);
+
+    g.fillStyle(color);
+    switch (dir) {
+      case DIR.UP:    g.fillRect(x + s * 7, y, s * 2, s * 8); break;
+      case DIR.DOWN:  g.fillRect(x + s * 7, y + s * 8, s * 2, s * 8); break;
+      case DIR.LEFT:  g.fillRect(x, y + s * 7, s * 8, s * 2); break;
+      case DIR.RIGHT: g.fillRect(x + s * 8, y + s * 7, s * 8, s * 2); break;
+    }
+  }
+
+  update(time, delta) {
+    this.blinkTimer += delta;
+    if (this.blinkTimer > 520) {
+      this.blinkTimer = 0;
+      this.showPrompt = !this.showPrompt;
+      this.promptText.setVisible(this.showPrompt);
+    }
+
+    if (Phaser.Input.Keyboard.JustDown(this.enterKey)) {
+      this.scene.start('GameScene');
+    }
+  }
+}
+
+// =====================================================================
 // PHASER CONFIG
 // =====================================================================
 const config = {
@@ -946,7 +1062,7 @@ const config = {
   height: H,
   backgroundColor: '#1a1a1a',
   parent: 'game-container',
-  scene: GameScene,
+  scene: [MenuScene, GameScene],
   render: {
     pixelArt: true,
     antialias: false,
